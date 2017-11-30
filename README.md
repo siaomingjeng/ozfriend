@@ -1,57 +1,105 @@
 ****************************商店建设***Django******Python3***********Virtual Environment**********************
 
 1. <<<<<<<<<<<<<<<<*************安装python3和pip3*************>>>>>>>>>>>>>>>>>>>
+
 wget https://www.python.org/ftp/python/3.6.2/Python-3.6.2.tgz
+
 tar -xvzf Python-3.6.2.tgz
+
 cd Python-3.6.2
+
 ./configure --enable-shared --enable-optimizations --with-threads --prefix=/usr/local/python3
+
 make
+
 make install
+
 ln -s /usr/local/python3/bin/python3.6 /usr/bin/python3   #链接到python3
+
 export LD_LIBRARY_PATH=/usr/local/python3/lib  #可以解决库libpython3.6m.so.1.0找不到的问题
+
 安装pip3：
+
 wget --no-check-certificate https://github.com/pypa/pip/archive/9.0.1.tar.gz
+
 tar -zvxf 9.0.1 -C pip-9.0.1
+
 cd pip-9.0.1
+
 python3 setup.py install
+
 ln -s /usr/local/python3/bin/pip /usr/bin/pip3
+
 pip install --upgrade pip   #升级pip
 
 第二种方法：从IUS安装：(建议)
+
 yum -y install https://centos7.iuscommunity.org/ius-release.rpm
+
 yum install python36u
+
 yum install python36u-devel
+
 ln -s /usr/bin/python3.6 /usr/bin/python3    (#用的是软连接 symbolic link  相当于windows的快捷方式。 )
+
 (#去掉-s 就是硬链接了，hard link直接指向文件节点。)
+
 安装pip3
+
 yum install python36u-pip
+
 ----------------------------------------------------------------------
+
 2. 创建virtualenv using python3
+
 virtualenv env3 -p /usr/bin/python3.6    #pip3 会自动安装好的
+
 pip install pillow
+
 pip install django
+
 pip install requests
+
 pip install mysqlclient
+
 pip install python-slugify
+
 pip install selenium
+
 pip install pyquery
+
 pip install mod_wsgi
+
 ----------------------------------------------------------------------
+
 3. 安装MariaDB
+
 yum install mariadb mariadb-server
+
 systemctl start mariadb
+
 systemctl enable mariadb
 
 yum install httpd
+
 yum install httpd-devel gcc
+
 --------------------------------------------------------------------
+
 4. 创建database，user，password：
+
 create database ozfriend default charset=utf8;
+
 grant all on ozfriend.* to ozfriend@'localhost' identified by 'ozfriend'; '%'表示任意网址可以来访问。
+
 flush privileges;
+
 --------------------------------------------------------------------
+
 5. 创建django工程，并配置settings
+
 ALLOWED_HOSTS = ['192.168.1.253']
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
