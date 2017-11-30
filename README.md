@@ -17,7 +17,7 @@ python3 setup.py install
 ln -s /usr/local/python3/bin/pip /usr/bin/pip3
 pip install --upgrade pip   #升级pip
 
-第二种方法：从IUS安装：(家里服务器用的这个)
+第二种方法：从IUS安装：(建议)
 yum -y install https://centos7.iuscommunity.org/ius-release.rpm
 yum install python36u
 yum install python36u-devel
@@ -95,7 +95,7 @@ CART_SESSION_ID = 'cart'  #每个访问用户都会有一个‘cart’。
 import pymysql
 pymysql.install_as_MySQLdb()
 
-方法二：（Django官网推荐, 家里服务器采用此）
+方法二：（Django官网推荐）
 yum install mariadb-devel （用mysql-devel会自动跳到mariadb-devel）
 pip install mysqlclient
 -------------------------------------------------------------------------------
@@ -169,7 +169,7 @@ Listen 8001
     python manage runserver 0:8080
     网页正常访问，说明django代码和依赖没问题。 
 
-8.7 权限配置 (家里服务器，没有进行此项设置，默认第三方有执行权限)
+8.7 权限配置 (没有进行此项设置，默认第三方有执行权限)
     usermod -a -G 用户 apache   # 将apache加入到‘用户’同组。
     chmod 710 /home/用户   #配置最小权限
     #常用命令：
@@ -597,7 +597,7 @@ from PIL import Image
 image = Image.open('vcode.png')
 vcode = pytesseract.image_to_string(image)
 print (vcode)
-#以上只能识别背景不复杂的图片（不好用，家里服务器没用这个）
+#以上只能识别背景不复杂的图片（不好用，没用这个）
 
 ---------------------------------------------------------------------------------------------
 
