@@ -1,0 +1,29 @@
+{% extends "shop/base.html" %}
+{% load static %}
+{% load ozfriend_tags %}
+
+{% block extracss %}
+  <link href="{% static "account/css/dashboard.css" %}" rel="stylesheet">
+{% endblock %}
+
+{% block title %} Dashboard{% endblock %}
+
+{% block content %}
+  <h1>Dashboard</h1>
+  <p>最新物流信息：(更新时间为昨夜3点！)</p>
+  <table>
+    <tr><th>订单号</th><th>收件人</th><th>物流状态</th></tr>
+  {% for item in order_list %}
+    <tr>
+      <td>{% if item.original %}{{item.original|xmean}}-{% endif %}<a><span class='customer-order-id'>{{item.id|xmean}}</span></a></td>
+      <td>{{item.receiver}}</td>
+      <td>{{item.track_result}}</td>
+    </tr>
+  {% endfor %}
+{% endblock %}
+
+{% block javascript%}
+<script src="{% static "shop/js/jquery.js" %}"></script>
+<script src="{% static "account/js/dashboard.js" %}"></script>
+{% endblock %}
+

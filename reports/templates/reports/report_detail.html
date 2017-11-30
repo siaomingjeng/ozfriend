@@ -1,0 +1,212 @@
+{% extends "admin/app_index.html" %}
+
+{% load static %}
+{% load ozfriend_tags %}
+
+{% block extrahead %}{{ block.super }}
+<script src="{% static 'admin/js/core.js' %}"></script>
+<script src="/admin/jsi18n/"></script>
+<script src="{% static 'admin/js/vendor/jquery/jquery.js' %}"></script>
+<script src="{% static 'admin/js/jquery.init.js' %}"></script>
+<script src="{% static 'admin/js/calendar.js' %}"></script>
+<script src="{% static 'admin/js/admin/DateTimeShortcuts.js' %}"></script>
+
+<script type="text/javascript">window.__admin_media_prefix__ = "{% filter escapejs %}{% static 'admin/' %}{% endfilter %}";</script>
+<script src="{% static 'admin/js/prepopulate.js' %}"></script>
+<script src="{% static 'admin/js/prepopulate_init.js' %}"></script>
+
+{% endblock %}
+
+{% block extrastyle %}
+<link rel="stylesheet" type="text/css" href="{% static 'admin/css/base.css' %}" />
+<link rel="stylesheet" type="text/css" href="{% static 'admin/css/forms.css' %}" />
+<link rel="stylesheet" type="text/css" href="{% static 'reports/css/reports.css' %}" />
+{% endblock %}
+
+
+
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+<a href="{% url 'admin:index' %}">Home</a>
+&rsaquo; <a href="{% url 'reports:report_list' %}">Report</a>
+&rsaquo; {{ report_type }}
+</div>
+{% endblock %}
+{% block content %}
+<div id="content-main">
+{% if title in 'Annual Report' or title in 'Monthly Report' %}
+<div class="oz-reports">
+    <table>
+        <caption>销量统计</caption>
+        <tr>
+            <th scope="row">订单数量:</th>
+            <td>{{ report.order_num }}</td>
+            <td>张</td>
+        </tr>
+        <tr>
+            <th colspan=1 scope="row">产品销量:</th>
+            <td>{{ report.item_num }}</td>
+            <td>件</td>
+        </tr>
+    </table>
+</div>
+<div class="oz-reports">
+    <table>
+        <caption>财政统计</caption>
+        <tr>
+            <th scope="row">营业额(RMB|AUD):</th>
+            <td>{{ report.price_rmb|show_rmb }}</td>
+            <td>{{ report.price_aud|show_aud }}</td>
+        </tr>
+        <tr>
+            <th colspan=1 scope="row">成本(RMB|AUD):</th>
+            <td>{{ report.expense_rmb|show_rmb }}</td>
+            <td>{{ report.expense_aud_cn|show_aud }}(中国)+{{ report.expense_aud_oz|show_aud }}(澳洲)</td>
+        </tr>
+    </table>
+</div>
+
+<div class="oz-reports">
+    <table>
+        <caption>利润统计</caption>
+        <tr>
+            <th scope="row">使用汇率:</th>
+            <td>1AUD={{ report.fx.fx|floatformat:2 }}RMB</td>
+        </tr>
+        <tr>
+            <th colspan=1 scope="row">净收入(AUD):</th>
+            <td colspan=2>{{ report.net_income_aud|show_aud }}</td>
+        </tr>
+    </table>
+</div>
+<div class="oz-reports">
+    <table>
+        <caption>其他</caption>
+        <tr>
+            <th scope="row">校验状态:</th>
+            <td>{% if report.parity %}<span class="green-all">校验成功</span>{% else %}<span class="warning-all">校验失败</span>{% endif %}</td>
+        </tr>
+        {% if report.error %}
+        <tr class="warning-all">
+            <th>错误订单:</th>
+            <td>{% for e in report.error %}{% if forloop.last %}{{ e }}{% else %}{{ e }}, {% endif %}{% endfor %}</td>
+        </tr>
+        {% endif %}
+        {% if report.lost %}
+        <tr class="warning-all">
+            <th>赔本订单:</th>
+            <td>{% for l in report.lost %}{% if forloop.last %}{{ l }}{% else %}{{ l }}, {% endif %}{% endfor %}</td>
+        </tr>
+        {% endif %}
+        {% if report.warn %}
+        <tr class="warning-all">
+            <th>警告订单:产品:</th>
+            <td>{% for w in report.warn %}{% if forloop.last %}{{ w }}{% else %}{{ w }}, {% endif %}{% endfor %}</td>
+        </tr>
+        {% endif %}
+    </table>
+</div>
+{% endif %}
+{% if title in 'Payer Report' %}
+<div class="oz-reports">
+    <table class="payer">
+        <caption>按照下单人统计</caption>
+        <tr>
+            <th>下单人</th>
+            <th>订单数</th>
+            <th>*货品数</th>
+            <th>售价AUD</th>
+            <th>成本AUD</th>
+            <th>利润AUD</th>
+        </tr>
+        {% for i in report.payer_list %}
+        <tr>
+            <td>{{ i.0 }}</td>
+            <td>{{ i.1.order_num }}单</td>
+            <td>{{ i.1.item_num }}件</td>
+            <td>{{ i.1.price|show_aud }}</td>
+            <td>{{ i.1.expense|show_aud }}</td>
+            <td>{{ i.1.profit|show_aud }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+</div>
+{% endif %}
+{% if title in 'Capital Report' %}
+<div class="oz-reports">
+    <table class="payer">
+        <caption>Capital Report</caption>
+        <tr>
+            <th></th>
+            <th>澳洲AUD</th>
+            <th>中国AUD</th>
+            <th>中国RMB</th>
+        </tr>
+        <tr>
+            <th scope="row">总支出:</th>
+            <td>{{ report.expense_aud_oz|show_aud }}</td>
+            <td>{{ report.expense_aud_cn|show_aud }}</td>
+            <td>{{ report.expense_rmb|show_rmb }}</td>
+        </tr>
+        <tr>
+            <th scope="row">总入账:</th>
+            <td>{{ report.price_aud|show_aud }}</td>
+            <td>-</td>
+            <td>{{ report.price_rmb|show_rmb }}</td>
+        </tr>
+        <tr>
+            <th colspan=2 scope="row">总换汇: ({{ report.fx.num }}笔, 1$={{ report.fx.fx|show_rmb }})</th>
+            <td>{{ report.fx.aud_cn|show_aud }}</td>
+            <td>{{ report.fx.rmb|show_rmb }}</td>
+        </tr>
+        <tr>
+            <th scope="row">总结:</th>
+            <td>{{ report.summary.expense_aud_oz|show_aud }}</td>
+            <td>{{ report.summary.expense_aud_cn|show_aud }}</td>
+            <td>{{ report.summary.price_rmb_cn|show_rmb }} (={{ report.summary.price_rmb_cn|rmb2aud:report.fx.fx|show_aud }})</td>
+        </tr>
+    </table>
+</div>
+{% endif %}
+</div>
+{% endblock %}
+{% block sidebar %}
+<div id="content-related">
+    <div id="report_date">
+        <table>
+            <caption><h2>日期范围<h2></caption>
+            <tr><th>From:</th><th>{{ report.begin }}</th></tr>
+            <tr><th>To:</th><th>{{ report.end }}</th></tr>
+        </table>
+    </div>
+    <div id="report_date_form">
+    {% if title in 'Annual Report' %}
+    <form action="{% url "reports:annual_report" %}" method="post" width="10px">
+        {{ report_date_form.as_p }}
+        {% csrf_token %}
+        <p><input type="submit" value="Search"></p>
+    </form>
+    {% endif %}
+    {% if title in 'Monthly Report' %}
+    <form action="{% url "reports:monthly_report" %}" method="post" width="10px">
+        {{ report_date_form.as_p }}
+        {% csrf_token %}
+        <p><input type="submit" value="Search"></p>
+    </form>
+    {% endif %}
+    {% if title in 'Payer Report' %}
+    <form action="{% url "reports:payer_report" %}" method="post" width="10px">
+        {{ report_date_form.as_p }}
+        {% csrf_token %}
+        <p><input type="submit" value="Search"><p>
+    </form>
+    {% endif %}
+    {% if title in 'Capital Report' %}
+    <form action="{% url "reports:capital_report" %}" method="post" width="10px">
+        {{ report_date_form.as_p }}
+        {% csrf_token %}
+        <p><input type="submit" value="Search"><p>
+    </form>
+    {% endif %}
+</div>
+{% endblock %}

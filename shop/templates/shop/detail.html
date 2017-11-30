@@ -1,0 +1,27 @@
+{% extends "shop/base.html" %}
+{% load static %}
+
+{% block title %}
+  {% if category %}{{ category.title }}{% else %}Product{% endif %}
+{% endblock %}
+
+{% block content %}
+  <div class="product-detail">
+    <img src="{% if product.image %}{{ product.image.url }}{% elif  product.ico %}
+              {{ product.ico.url }}{% else %}{% static "img/no_img.png" %}{% endif %}">
+    <h1>{{ product.chinese }}</h1>
+    <h2>{{ product.name }}</h2>
+      <h2>所属分类：
+        {% for c in categories %}
+          <a href="{{ c.get_absolute_url }}">{{ c.chinese }} </a>
+        {% endfor %}
+      </h2>
+    <p class="price">RMB: {{ product.price_rmb }} </p>
+      <form action="{% url "cart:cart_add" product.id %}" method="post">
+        {{ cart_product_form }}
+        {% csrf_token %}
+        <input type="submit" value="Add to cart">
+      </form>
+      {{ product.description|linebreaks }}
+  </div>
+{% endblock %}

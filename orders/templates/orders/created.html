@@ -1,0 +1,21 @@
+{% extends "shop/base.html" %}
+{% load static %}
+{% load ozfriend_tags %}
+
+{% block title %}
+  Thank you
+{% endblock %}
+
+{% block content%}
+  <h1>Thank you</h1>
+  <p>your order has been successfully completed. Your order number is <strong>{{ order.id|xmean }}</strong>.</p>
+  <p>Please remember the order number and pay ￥{{ order.total_price_rmb }} via WeChat or AliPay below!</p>
+  <p>Please <strong>add the order number into notes of payment</strong>! Thanks!</p>
+  <p><br></br></p>
+  <div class="payment">
+      <img src="{% static "shop/img/alipay.png" %}" >
+  </div>
+  <div class="payment">
+      <img src="{% static "shop/img/wechat.png" %}" >
+  </div>
+{% endblock %}

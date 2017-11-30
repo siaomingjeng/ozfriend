@@ -1,0 +1,8 @@
+{% extends "admin/app_index.html" %}
+{% block content %}
+    {% include "reports/ozfriend_report_list.html" %}
+    {% block ozfriendreport %}{{ block.super }}{% endblock %}
+{% endblock %}
+{% block sidebar %}
+{% if marry_count %}<h1 color="#417690;">{{ marry_count }}</h1>{% endif %}
+{% endblock %}

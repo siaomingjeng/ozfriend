@@ -1,0 +1,13 @@
+{% extends "shop/base.html" %}
+{% load static %}
+{% block title %}
+  Thank you
+{% endblock %}
+
+{% block content%}
+  <h1>Repeated Order</h1>
+  <p><strong>请不要重复提交订单！</strong></p>
+  <p class="text-right">
+      <a href="{% url "shop:product_list" %}" class="button list">Go back to shop!</a>
+  </p>
+{% endblock %}

@@ -1,0 +1,46 @@
+.aligned label {
+    width: 120px;
+}
+
+fieldset .field-box {
+    margin-right:90px;
+}
+/*
+input#id_total_price_rmb, input#id_total_expense_aud, input#id_total_price_aud, input#id_total_expense_rmb, input#id_fx_rate {
+    width: 90px;
+}*/
+
+textarea#id_message{
+    height: 60px;
+    width: 753px;
+}
+.field-delivered {
+    padding: 4px 6px 4px 10px;
+    font-weight: bold;
+}
+input#id_address {
+    width: 753px;
+}
+
+#ozfriend_show_all {
+    padding: 3px 5px 5px;
+    margin-left: 22px;
+
+}
+#ozfriend_hide_some {
+    padding: 3px 5px 5px;
+    margin-left: 8px;
+    display:none;
+}
+
+#items-group > div > fieldset > table > tbody input[type=number] {
+    width: 70px;
+}
+#search-result {
+    position:absolute;
+    background: #79aec8;
+    z-index:9999;
+}
+#search-result div.hover{
+    background:#20f33a;
+}

@@ -1,0 +1,45 @@
+/* Used for table style of OZ-frend reports */
+.oz-reports table th {
+    width: 100%;
+}
+.oz-reports table td {
+    white-space: nowrap;
+}
+
+.oz-reports table td a {
+    display: block;
+    padding-right: .6em;
+}
+
+.oz-reports table {width: 600px}
+.oz-reports table.payer th, .oz-reports table .payer td{width: 17%;text-align: middle;}
+.oz-reports table tr th, .oz-reports table tr td:first-child{text-align: left;}
+.oz-reports table tr th:not(:first-child), .oz-reports table tr td:not(:first-child) {text-align: right;}
+.oz-reports table caption {
+    font-size: 12px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    margin: 0;
+    padding: 8px;
+    font-weight: 400;
+    font-size: 13px;
+    text-align: left;
+    background: #79aec8;
+    color: #fff;
+}
+#report_date_form p {
+    text-align: right;
+}
+#report_date_form {
+    padding: 30px 5px 0px 5px;
+}
+#report_date{
+    text-align:middle;
+    padding: 0px 5px 0px 20px;
+}
+.warning-all {
+    color:red;
+}
+.green-all {
+    color:green;
+}

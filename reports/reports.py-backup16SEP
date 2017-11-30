@@ -1,0 +1,192 @@
+from orders.models import OrderItem, Order
+from fx.models import FX
+from decimal import Decimal
+from pytz import timezone
+import datetime as dt
+
+
+class Report(object):
+    def __init__(self):
+        # for naive (non-timezone aware) datetime Warning
+        self.tz = timezone('Australia/Sydney')
+
+    def get_result(self, F, T):
+        orders = Order.objects.filter(created__range=[
+                dt.datetime(F.year, F.month, F.day, F.hour, F.minute,
+                            tzinfo=self.tz),
+                dt.datetime(T.year, T.month, T.day, T.hour, T.minute,
+                            tzinfo=self.tz)],
+                paid=True)
+        items = OrderItem.objects.filter(order__in=orders)
+        res = {'expense_aud_cn': 0, 'expense_aud_oz': 0, 'price_rmb': 0, 'item_num': 0,
+               'expense_rmb':0, 'price_aud':0, 'price_aud_order': 0, 'expense_rmb_order': 0,
+               'order_num': len(orders), 'price_rmb_order': 0, 'expense_aud_order': 0}
+        for i in items:
+            res['price_rmb'] += i.quantity*i.price_rmb
+            res['price_aud'] += i.quantity*i.price_aud
+            res['expense_rmb'] += i.quantity*i.expense_rmb
+            if i.expense_aud_card == 'CN':
+                res['expense_aud_cn'] += i.quantity*i.expense_aud
+            if i.expense_aud_card == 'OZ':
+                res['expense_aud_oz'] += i.quantity*i.expense_aud
+            # delivery fee and discount are not counted into quanity.
+            if i.product_id not in [1, 2]:
+                res['item_num'] += i.quantity
+        res['expense_aud'] = res['expense_aud_cn'] + res['expense_aud_oz']
+        for j in orders:
+            res['price_rmb_order'] += j.total_price_rmb
+            res['expense_aud_order'] += j.total_expense_aud
+            res['price_aud_order'] += j.total_price_aud
+            res['expense_rmb_order'] += j.total_expense_rmb
+        res['fx'] = self.get_fx(F, T)
+        res['net_income_aud'] = round(res['price_aud']+res['price_rmb']/res['fx']['fx']-
+                                      res['expense_aud']-
+                                      res['expense_rmb']/res['fx']['fx'], 2)
+        res['parity'] = res['expense_aud'] == res['expense_aud_order'] and \
+            res['price_rmb'] == res['price_rmb_order'] and \
+            res['expense_rmb'] == res['expense_rmb_order'] and \
+            res['price_aud'] == res['price_aud_order']
+        res['end'] = T
+        res['begin'] = F
+        return res
+
+    def get_this_year(self, date_from=0, date_to=0):
+        if date_from and date_to:
+            begin = dt.datetime(date_from.year, date_from.month, date_from.day,
+                                0, 0, 0)
+            if date_to >= dt.datetime.now().date():
+                t = dt.datetime.now()
+                end = dt.datetime(t.year, t.month, t.day, t.hour, t.minute)
+            else:
+                end = dt.datetime(date_to.year, date_to.month, date_to.day,
+                                  23, 59, 59)
+        else:
+            t = dt.datetime.now()
+            end = dt.datetime(t.year, t.month, t.day, t.hour, t.minute)
+            begin = dt.datetime(t.year, 1, 1, 0, 0, 0)
+        return self.get_result(begin, end)
+
+    def get_this_month(self, date_from=0, date_to=0):
+        if date_from and date_to:
+            begin = dt.datetime(date_from.year, date_from.month, date_from.day,
+                                0, 0, 0)
+            if date_to >= dt.datetime.now().date():
+                t = dt.datetime.now()
+                end = dt.datetime(t.year, t.month, t.day, t.hour, t.minute)
+            else:
+                end = dt.datetime(date_to.year, date_to.month, date_to.day,
+                                  23, 59, 59)
+        else:
+            t = dt.datetime.now()
+            end = dt.datetime(t.year, t.month, t.day, t.hour, t.minute)
+            begin = dt.datetime(t.year, t.month, 1, 0, 0, 0)
+        return self.get_result(begin, end)
+
+    def get_payers(self, F, T, Value=0):
+        orders = Order.objects.filter(created__range=[
+            dt.datetime(F.year, F.month, F.day, F.hour, F.minute,
+                        tzinfo=self.tz),
+            dt.datetime(T.year, T.month, T.day, T.hour, T.minute,
+                        tzinfo=self.tz)],
+            paid=True)
+        res = {'payer_list': {}, 'end': T, 'begin': F}
+        for i in orders:
+            if i.payer in res['payer_list'].keys():
+                res['payer_list'][i.payer]['expense'] += i.total_expense_aud
+                res['payer_list'][i.payer]['price_rmb'] += i.total_price_rmb
+                res['payer_list'][i.payer]['order_num'] += 1
+            else:
+                res['payer_list'][i.payer] = {'expense': i.total_expense_aud,
+                                              'price_rmb': i.total_price_rmb,
+                                              'order_num': 1, 'item_num': 0}
+            items = OrderItem.objects.filter(order=i)
+            for item in items:
+                if item.product_id not in [1, 2] and item.price_rmb >= Value:
+                    res['payer_list'][i.payer]['item_num'] += item.quantity
+        fx = self.get_fx(F, T)
+        for i in res['payer_list'].keys():
+            res['payer_list'][i]['profit'] = round(
+                    res['payer_list'][i]['price_rmb'] / fx['fx'] -
+                    res['payer_list'][i]['expense'], 2)
+
+        res['payer_list'] = sorted(res['payer_list'].items(),
+                                   key=lambda item: item[1]['profit'],
+                                   reverse=True)
+        return res
+
+    def get_payers_year(self, date_from=0, date_to=0, over=0):
+        if date_from and date_to:
+            begin = dt.datetime(date_from.year, date_from.month, date_from.day,
+                                0, 0, 0)
+            if date_to >= dt.datetime.now().date():
+                t = dt.datetime.now()
+                end = dt.datetime(t.year, t.month, t.day, t.hour, t.minute)
+            else:
+                end = dt.datetime(date_to.year, date_to.month, date_to.day,
+                                  23, 59, 59)
+        else:
+            t = dt.datetime.now()
+            end = dt.datetime(t.year, t.month, t.day, t.hour, t.minute)
+            begin = dt.datetime(t.year, 1, 1, 0, 0, 0)
+        return self.get_payers(begin, end, over)
+
+    def get_fx(self, F, T):
+        fx = FX.objects.filter(date__range=[
+                dt.datetime(F.year, F.month, F.day, F.hour, F.minute,
+                            tzinfo=self.tz),
+                dt.datetime(T.year, T.month, T.day, T.hour, T.minute,
+                            tzinfo=self.tz)])
+        res_fx = {'aud_cn': 0, 'rmb': 0, 'fx': 0, 'num': 0}
+        if fx:
+            for f in fx:
+                res_fx['aud_cn'] += f.aud
+                res_fx['rmb'] += f.rmb
+                res_fx['num'] += 1
+            res_fx['fx'] += round(res_fx['rmb']/res_fx['aud_cn'], 2)
+            return res_fx
+        else:
+            return {'aud_cn': 0, 'rmb': 0, 'fx': Decimal(5.3)}
+
+    def get_capital_year(self, date_from=0, date_to=0):
+        if date_from and date_to:
+            begin = dt.datetime(date_from.year, date_from.month, date_from.day,
+                                0, 0, 0)
+            if date_to >= dt.datetime.now().date():
+                t = dt.datetime.now()
+                end = dt.datetime(t.year, t.month, t.day, t.hour, t.minute)
+            else:
+                end = dt.datetime(date_to.year, date_to.month, date_to.day,
+                                  23, 59, 59)
+        else:
+            t = dt.datetime.now()
+            end = dt.datetime(t.year, t.month, t.day, t.hour, t.minute)
+            begin = dt.datetime(t.year, 1, 1, 0, 0, 0)
+
+        res = self.get_result(begin, end)
+        res['summary'] = {'expense_aud_oz': 0-res['expense_aud_oz'],
+                          'expense_aud_cn': res['fx']['aud_cn']-res['expense_aud_cn'],
+                          'price_rmb': res['price_rmb']-res['fx']['rmb']}
+        res['summary']['rmb_to_aud'] = round(
+                res['summary']['price_rmb']/res['fx']['fx'], 2)
+        return res
+
+
+def YMD():
+    def get_days_of_month(Y, M):
+        D = [31, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
+        if M == 2:
+            return 27 if Y % 4 else 28
+        else:
+            return D[M]
+    now = dt.datetime.now()
+    dy = now.year-2016
+    dm = now.month-3
+    dd = now.day-25
+    if dd < 0:
+        dm -= 1
+        dd += get_days_of_month(now.year, now.month)
+    if dm < 0:
+        dy -= 1
+        dm += 12
+    days = (now-dt.datetime(2016, 3, 25)).days
+    return (dy, dm, dd, days)

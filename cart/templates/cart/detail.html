@@ -1,0 +1,62 @@
+{% extends "shop/base.html" %}
+{% load static %}
+
+{% block title %}
+  Your shopping cart
+{% endblock %}
+
+{% block content %}
+  <h1>Your shopping cart</h1>
+    <table class="cart">
+      <thead>
+        <tr>
+          <th>Image</th>
+          <th>Product</th>
+          <th>Quantity</th>
+          <th>Remove</th>
+          <th>Unit</th>
+          <th>Price</th>
+          <th>Weight</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in cart %}
+            <tr>
+              <td>
+                <a href="{{ item.url }}">
+                  <img src="{% if item.ico_url %}{{ item.ico_url }}{% else %}{% static "img/no_image.png" %}{% endif %}">
+                </a>
+              </td>
+              <td>{{ item.chinese }}</td>
+              <td>
+                <form action="{% url "cart:cart_add" item.id %}" method="post">
+                  {{ item.update_quantity_form.quantity }}
+                  {{ item.update_quantity_form.update }}
+                  <input type="submit" value="Update">
+                  {% csrf_token %}
+                </form>
+              </td>
+              <td><a href="{% url "cart:cart_remove" item.id %}">Remove</a></td>
+              <td class="num">￥{{ item.price_rmb }}</td>
+              <td class="num">￥{{ item.total_price_rmb }}</td>
+              <td class="num">{{ item.total_weight }}</td>
+            </tr>
+        {% endfor %}
+        <tr class="total">
+          <td>Total:</td>
+          <td colspan="2">￥{{ cart.get_total_price_rmb_with_delivery }} （货款:￥{{ cart.get_total_price_rmb}}, 运费: ￥{{ cart.get_delivery_fee_aud }})</td>
+          <td colspan="2"></td>
+          <td colspan="2" class="num">
+           {% if cart.get_total_weight.milk %}奶粉 {{ cart.get_total_weight.milk }}g{% endif %}
+           {% if cart.get_total_weight.misc %}杂货 {{ cart.get_total_weight.misc }}g{% endif %}
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <p class="text-right">
+      <a href="{% url "shop:product_list" %}" class="button list">Continue shopping</a>
+      {% if cart.len %}
+      <a href="{% url "orders:order_create" %}" class="button">Checkout</a>
+      {% endif %}
+    </p>
+{% endblock %}

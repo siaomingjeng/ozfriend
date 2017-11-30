@@ -1,0 +1,93 @@
+.chinese {
+    font-size:15px;
+    width:150px;
+}
+
+p.no-break {
+    display:inline;
+}
+
+form .search_ME {
+    width:84%;
+    font-size:13px;
+    margin-bottom:10px;
+    padding:10px 12px;
+    border:0;
+    background:#efefef;
+    color:#666;
+    border-radius:4px;
+}
+div #search-result{
+    font-size:13px;
+}
+form.quick{
+    margin:0px;
+    display:inline;
+}
+form.quick button{
+    background-color:#5993bb;
+    color:#fff;
+    font-weight:bold;
+    border: 0;
+    border-radius: 4px;
+}
+form p textarea {
+    float:left;
+    clear:both;
+    width:320px;
+    height:100px;
+    font-size:13px;
+    margin-bottom:10px;
+    border:0;
+    color:#666;
+    border-radius:4px;
+    background: #efefef;
+}
+div #pagination {
+   /* background: #53a9db;*/
+    padding: 10px 100px;
+    display: block;
+    overflow: auto;
+    font-size:18px;
+    font-weight:bold;
+    border: 0;
+    border-radius: 4px;
+    position:relative;
+    bottom:0px;
+    margin-left:300px;
+}
+div #live-search div.hover{
+    background:#53a9db;
+}
+
+img#verification {
+    float: right;
+    height: 36px;
+    margin:0 -5px -3px 0;
+    border: solid 0px;
+    border-radius: 4px;
+}
+input.verification{
+    width: 100px;
+    font-size: 13px;
+    padding: 10px 12px;
+    border: 0;
+    margin-left: -4px;
+    background: #efefef;
+    color: #666;
+    border-radius: 4px;
+}
+table.verification tr td{
+    background:white;
+}
+input.order-submit {
+    width: 323px;
+    margin-left: 1px;
+}
+.acc-valid-img{
+    float:left;
+    height:35px;
+    margin-top: 4px;
+    margin-left: 56px;
+    border-radius: 4px;
+}

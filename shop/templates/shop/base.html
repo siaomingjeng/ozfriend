@@ -1,0 +1,46 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>{% block title %}OZ Friend{% endblock %}</title>
+  <link href="{% static "shop/css/base.css" %}" rel="stylesheet">
+  <link href="{% static "shop/css/ozfriend.css" %}" rel="stylesheet">
+  <link rel="shortcut icon" type="image/png" href="{% static "shop/img/favicon.ico" %}"/>
+  {% block extracss %}
+  {% endblock %}
+
+</head>
+  <div id="header">
+    <a href="/" class="logo">Welcome to OZ Friend's Store!</a>
+    <span class="user">
+    {% if request.user.is_authenticated %}
+      Hello <a href="{% url "account:dashboard" %}">{{request.user.first_name}}</a>,
+        <a href="{% url "account:logout" %}">Log out</a>
+    {% else %}
+      <a href="{% url "account:login" %}">Log in</a>
+    {% endif %}
+    </span>
+  </div>
+  <div id="subheader">
+    <div class="cart">
+      {% with total_items=cart|length %}
+        <span {% if total_items %}{% else %}class="hide"{% endif %}>
+          <p class=no-break> Your Cart:</p> 
+          <a href="{% url "cart:cart_detail" %}">
+            <p class=no-break id=js-item-number>{{ total_items }}</p> item{{ total_items|pluralize }},
+            ￥<p class=no-break id=js-price-total>{{ cart.get_total_price_rmb|floatformat:2 }}</p></a>
+        </span>
+      {% endwith %}
+    </div>
+  </div>
+  <div id="content">
+    {% block content %}
+    {% endblock %}
+  </div>
+  <div id="javascript">
+    {% block javascript %}
+    {% endblock %}
+  </div>
+
+</html>
